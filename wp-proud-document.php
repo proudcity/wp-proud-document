@@ -148,7 +148,7 @@ class ProudDocument extends \ProudPlugin {
 
 
   public function display_document_meta_box( $document ) {
-    wp_enqueue_media();print_r($document->ID);
+    wp_enqueue_media();
     ?>
       <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
       <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo get_post_meta( $document->ID, 'document_meta', true ); ?>' />
