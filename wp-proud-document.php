@@ -153,9 +153,12 @@ class ProudDocument extends \ProudPlugin {
       <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
       <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo get_post_meta( $document->ID, 'document_meta', true ); ?>' />
       <img src="" id="upload-thumb" style="float:left;margin-right: 5px;" />
-      <strong><div id="upload-filename" style="padding-bottom:.5em;"></div></strong>
-      <button type="button" id="upload-remove" class="button" style="display:none;">Remove</button>
-      <button type="button" id="upload-upload" class="button"><span class="wp-media-buttons-icon"></span> <span id="upload-add-text">Add</span><span id="upload-change-text" style="display: none">Change</span> Document</button>
+      <strong><div id="upload-filename-text" style="padding-bottom:.5em;"></div></strong>
+      <input id="upload-filename" type="text" name="upload_filename" value="<?php echo get_post_meta( $document->ID, 'document_filename', true ); ?>" style="display:none;" />
+      <div>
+        <button type="button" id="upload-remove" class="button" style="display:none;">Remove</button>
+        <button type="button" id="upload-upload" class="button"><span class="wp-media-buttons-icon"></span> <span id="upload-add-text">Add</span><span id="upload-change-text" style="display: none">Change</span> Document</button>
+      </div>
       <div class="clearfix"></div>
       <script type="text/javascript">
       function renderMediaUploader() {
@@ -172,8 +175,8 @@ class ProudDocument extends \ProudPlugin {
         file_frame.on( 'insert', function() {
           json = file_frame.state().get( 'selection' ).first().toJSON();
           jQuery('#upload-src').val(json.url);
+          jQuery('#upload-filename').val(json.filename);
           jQuery('#upload-meta').val(JSON.stringify({
-            filename: json.filename,
             size: json.filesizeHumanReadable,
             icon: json.icon,
             mime: json.mime,
@@ -193,21 +196,26 @@ class ProudDocument extends \ProudPlugin {
               $('#upload-meta').bind('change', function(){changeMeta()});
               function changeMeta() {console.log($('#upload-meta').val());
                 var meta = JSON.parse($('#upload-meta').val());
-                if (meta != undefined && meta.filename != undefined) {
+                if (meta != undefined && meta.mime != undefined) {
                   $('#upload-thumb').attr('src', meta.icon);
-                  $('#upload-filename').text(meta.filename + ' ('+ meta.size +')');
-                  $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text').show();
-                  $('#upload-add-text').hide();
+                  $('#upload-filename-text').html($('#upload-filename').val() + ' ('+ meta.size +') <a href="#">edit</a>');
+                  $('#upload-thumb, #upload-filename-text, #upload-remove, #upload-change-text').show();
+                  $('#upload-add-text, #upload-filename').hide();
                 }
                 else {
-                  $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text').hide();
+                  $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text, #upload-filename-text').hide();
                   $('#upload-add-text').show();
                 }
               }
               changeMeta();
               $( '#upload-remove' ).on( 'click', function( evt ) {
                 evt.preventDefault();
-                $('#upload-thumb, #upload-filename').val('');
+                $('#upload-thumb, #upload-filename, #upload-filename-text').val('').bind('change');
+              });
+              $( '#upload-filename-text, #upload-filename-text a' ).on( 'click', function( evt ) {
+                evt.preventDefault();
+                $('#upload-filename').show();
+                $('#upload-filename-text').hide();
               });
           });
       })( jQuery );
@@ -222,6 +230,7 @@ class ProudDocument extends \ProudPlugin {
   public function add_document_fields( $id, $document ) {
     if ( $document->post_type == 'document' ) {
       update_post_meta( $id, 'document', $_POST['upload_src'] );
+      update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
       update_post_meta( $id, 'document_meta', $_POST['upload_meta'] );
     }
   }
