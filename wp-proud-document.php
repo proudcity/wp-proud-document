@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Poud Document
+Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
 Version: 1.0
