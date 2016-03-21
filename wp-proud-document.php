@@ -6,7 +6,7 @@ Description: Declares an Document custom post type.
 Version: 1.0
 Author: ProudCity
 Author URI: http://proudcity.com/
-License: GPLv2
+License: Affero GPL v3
 */
 
 namespace Proud\Document;
