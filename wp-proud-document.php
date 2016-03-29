@@ -99,9 +99,14 @@ class ProudDocument extends \ProudPlugin {
   }
 
   public function document_admin() {
-    add_meta_box( 'document_meta_box',
+    add_meta_box( 'document_file_meta_box',
       'File',
-      array($this, 'display_document_meta_box'),
+      array($this, 'display_document_file_meta_box'),
+      'document', 'normal', 'high'
+    );
+    add_meta_box( 'document_form_meta_box',
+      'Form',
+      array($this, 'display_document_form_meta_box'),
       'document', 'normal', 'high'
     );
   }
@@ -146,8 +151,10 @@ class ProudDocument extends \ProudPlugin {
       return $return;
   }
 
-
-  public function display_document_meta_box( $document ) {
+  /**
+   * Display the file upload meta box
+   */
+  public function display_document_file_meta_box( $document ) {
     wp_enqueue_media();
     ?>
       <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
@@ -225,13 +232,47 @@ class ProudDocument extends \ProudPlugin {
   }
 
   /**
-   * Saves contact metadata fields 
+   * Adds form api fields
+   */
+  public function build_fields($id) {
+    $this->fields = [];
+  
+    $this->fields['form'] = [
+      '#type' => 'gravityform',
+      '#title' => __('Form'),
+      '#description' => __('Select a form. <a href="admin.php?page=gf_edit_forms" target="_blank">Create a new form</a>. Leave this empty if there is no form version of this Document.', 'wp-proud-document'),
+      '#name' => 'form',
+      '#value' => get_post_meta( $id, 'form', true ),
+    ];
+
+    return $this->fields;
+  }
+
+  /**
+   * Adds document form metadata field
+   */
+  public function display_document_form_meta_box( $document ) {
+    $this->build_fields($document->ID);
+    $form = new \Proud\Core\FormHelper( $this->key, $this->fields );
+    $form->printFields();
+  }
+
+  /**
+   * Saves document metadata fields 
    */
   public function add_document_fields( $id, $document ) {
     if ( $document->post_type == 'document' ) {
+      // File fields
       update_post_meta( $id, 'document', $_POST['upload_src'] );
       update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
       update_post_meta( $id, 'document_meta', $_POST['upload_meta'] );
+
+      // Form api fields
+      foreach ($this->build_fields($id) as $key => $field) {
+        if ( !empty( $_POST[$key] ) || !empty(get_post_meta( $id, $key, true )) ) {  // @todo: check if it has been set already to allow clearing of value
+          update_post_meta( $id, $key, $_POST[$key] );
+        }
+      }
     }
   }
 
