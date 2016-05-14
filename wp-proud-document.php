@@ -38,6 +38,9 @@ class ProudDocument extends \ProudPlugin {
     $this->hook( 'save_post', 'add_document_fields', 10, 2 );
     $this->hook( 'rest_api_init', 'document_rest_support' );
     $this->hook( 'init', 'document_taxonomy' );
+
+    add_action( 'wp_ajax_proud_document_icon', array($this, 'get_icon') );
+
   }
 
 
@@ -159,7 +162,7 @@ class ProudDocument extends \ProudPlugin {
     ?>
       <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
       <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo get_post_meta( $document->ID, 'document_meta', true ); ?>' />
-      <img src="" id="upload-thumb" style="float:left;margin-right: 5px;" />
+      <i class="fa fa-3x filetype-icon text-muted" id="upload-thumb" style="float:left;margin-right: 5px;"></i>
       <strong><div id="upload-filename-text" style="padding-bottom:.5em;"></div></strong>
       <input id="upload-filename" type="text" name="upload_filename" value="<?php echo get_post_meta( $document->ID, 'document_filename', true ); ?>" style="display:none;" />
       <div>
@@ -204,7 +207,14 @@ class ProudDocument extends \ProudPlugin {
               function changeMeta() {console.log($('#upload-meta').val());
                 var meta = JSON.parse($('#upload-meta').val());
                 if (meta != undefined && meta.mime != undefined) {
-                  $('#upload-thumb').attr('src', meta.icon);
+                  // Get the icon to use
+                  jQuery.get(
+                    ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype, 
+                    {}, 
+                    function(response){
+                      $('#upload-thumb').addClass( response.icon );
+                    }
+                  );
                   $('#upload-filename-text').html($('#upload-filename').val() + ' ('+ meta.size +') <a href="#">edit</a>');
                   $('#upload-thumb, #upload-filename-text, #upload-remove, #upload-change-text').show();
                   $('#upload-add-text, #upload-filename').hide();
@@ -276,7 +286,71 @@ class ProudDocument extends \ProudPlugin {
     }
   }
 
+  /**
+   * AJAX callback gets icon from a filetype
+   */
+  public function get_icon( ) {
+    return wp_send_json(array(
+      'icon' => get_document_icon( 0, $_GET['filetype'] )
+    ));
+  }
+
+
 } // class
 
 
 new ProudDocument;
+
+
+
+
+/**
+ * Gets the url for the agency homepage (internal or external)
+ */
+function get_document_icon($post = 0, $filetype = null) {
+  $post = $post > 0 ? $post : get_the_ID();
+  if ( empty($filetype) ) {
+    $form = get_post_meta( $post, 'form', true );
+    if (!empty($form)) {
+      return 'fa-globe';
+    }
+
+    $meta = json_decode( get_post_meta( $post, 'document_meta', true ) );
+    $filetype = $meta->filetype;
+  }
+
+  switch ($filetype) {
+    case 'pdf':
+      return 'fa-file-pdf-o';
+      break;
+    case 'doc':
+    case 'docx':
+      return 'fa-file-word-o';
+      break;
+    case 'ppt':
+    case 'pptx':
+      return 'fa-file-powerpoint-o';
+      break;
+    case 'xls':
+    case 'xlsx':
+      return 'fa-file-excel-o';
+      break;
+    case 'wav':
+    case 'aif':
+    case 'mp3':
+      return 'fa-file-audio-o';
+      break;
+    case 'zip':
+    case 'tar':
+      return 'fa-file-zip-o';
+      break;
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+      return 'fa-file-photo-o';
+      break;
+    default:
+      return 'fa-file-text-o';
+  }
+}
