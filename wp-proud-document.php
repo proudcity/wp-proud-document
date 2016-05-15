@@ -302,24 +302,31 @@ class ProudDocument extends \ProudPlugin {
 new ProudDocument;
 
 
-
+/**
+ * Helper: Returns the document type (suffix)
+ */
+function get_document_type($post = 0, $filename = null) {
+  $post = $post > 0 ? $post : get_the_ID();
+  if ( empty($filename) ) {
+    $filename = get_post_meta( $post, 'document_filename', true );
+  }
+  if ( empty($filename) ) {
+    return '';
+  }
+  $info = pathinfo($filename);
+  return strtolower($info['extension']);
+}
 
 /**
- * Gets the url for the agency homepage (internal or external)
+ * Helper: Returns the document fontawesome icon
  */
-function get_document_icon($post = 0, $filetype = null) {
-  $post = $post > 0 ? $post : get_the_ID();
-  if ( empty($filetype) ) {
-    $form = get_post_meta( $post, 'form', true );
-    if (!empty($form)) {
-      return 'fa-globe';
-    }
-
-    $meta = json_decode( get_post_meta( $post, 'document_meta', true ) );
-    $filetype = $meta->filetype;
+function get_document_icon($post = 0, $filename = null) {
+  $form = get_post_meta( $post, 'form', true );
+  if (!empty($form)) {
+    return 'fa-globe';
   }
 
-  switch ($filetype) {
+  switch ( get_document_type($post, $filename) ) {
     case 'pdf':
       return 'fa-file-pdf-o';
       break;
