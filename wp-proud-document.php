@@ -204,7 +204,7 @@ class ProudDocument extends \ProudPlugin {
                   renderMediaUploader();
               });
               $('#upload-meta').bind('change', function(){changeMeta()});
-              function changeMeta() {console.log($('#upload-meta').val());
+              function changeMeta() {
                 var meta = JSON.parse($('#upload-meta').val());
                 if (meta != undefined && meta.mime != undefined) {
                   // Get the icon to use
@@ -223,17 +223,25 @@ class ProudDocument extends \ProudPlugin {
                   $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text, #upload-filename-text').hide();
                   $('#upload-add-text').show();
                 }
+                bindBtns();
               }
               changeMeta();
-              $( '#upload-remove' ).on( 'click', function( evt ) {
-                evt.preventDefault();
-                $('#upload-thumb, #upload-filename, #upload-filename-text').val('').bind('change');
-              });
-              $( '#upload-filename-text, #upload-filename-text a' ).on( 'click', function( evt ) {
-                evt.preventDefault();
-                $('#upload-filename').show();
-                $('#upload-filename-text').hide();
-              });
+
+              function bindBtns() {
+                $( '#upload-remove' ).on( 'click', function( evt ) {
+                  evt.preventDefault();
+                  $('#upload-thumb, #upload-filename, #upload-filename-text, #upload-meta, #upload-src').val('').bind('change').hide();
+                  $('#upload-remove').hide();
+                  $('#upload-upload').show();
+                });
+                $( '#upload-filename-text, #upload-filename-text a' ).on( 'click', function( evt ) {
+                  evt.preventDefault();
+                  $('#upload-filename').show();
+                  $('#upload-filename-text').hide();
+                });
+              }
+              bindBtns();
+              
           });
       })( jQuery );
     </script>
