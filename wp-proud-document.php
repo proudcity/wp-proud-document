@@ -205,25 +205,28 @@ class ProudDocument extends \ProudPlugin {
               });
               $('#upload-meta').bind('change', function(){changeMeta()});
               function changeMeta() {
-                var meta = JSON.parse($('#upload-meta').val());
-                if (meta != undefined && meta.mime != undefined) {
-                  // Get the icon to use
-                  jQuery.get(
-                    ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype, 
-                    {}, 
-                    function(response){
-                      $('#upload-thumb').addClass( response.icon );
-                    }
-                  );
-                  $('#upload-filename-text').html($('#upload-filename').val() + ' ('+ meta.size +') <a href="#">edit</a>');
-                  $('#upload-thumb, #upload-filename-text, #upload-remove, #upload-change-text').show();
-                  $('#upload-add-text, #upload-filename').hide();
+                var meta = $('#upload-meta').val();
+                if (meta) {
+                  meta = JSON.parse(meta);
+                  if (meta != undefined && meta.mime != undefined) {
+                    // Get the icon to use
+                    jQuery.get(
+                      ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype, 
+                      {}, 
+                      function(response){
+                        $('#upload-thumb').addClass( response.icon );
+                      }
+                    );
+                    $('#upload-filename-text').html($('#upload-filename').val() + ' ('+ meta.size +') <a href="#">edit</a>');
+                    $('#upload-thumb, #upload-filename-text, #upload-remove, #upload-change-text').show();
+                    $('#upload-add-text, #upload-filename').hide();
+                  }
+                  else {
+                    $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text, #upload-filename-text').hide();
+                    $('#upload-add-text').show();
+                  }
+                  bindBtns();
                 }
-                else {
-                  $('#upload-thumb, #upload-filename, #upload-remove, #upload-change-text, #upload-filename-text').hide();
-                  $('#upload-add-text').show();
-                }
-                bindBtns();
               }
               changeMeta();
 
