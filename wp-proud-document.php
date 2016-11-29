@@ -107,11 +107,6 @@ class ProudDocument extends \ProudPlugin {
       array($this, 'display_document_file_meta_box'),
       'document', 'normal', 'high'
     );
-    add_meta_box( 'document_form_meta_box',
-      'Form',
-      array($this, 'display_document_form_meta_box'),
-      'document', 'normal', 'high'
-    );
   }
 
   public function document_rest_support() {
@@ -145,13 +140,14 @@ class ProudDocument extends \ProudPlugin {
    * Add metadata to the post response
    */
   public function document_rest_metadata( $object, $field_name, $request ) {
-      $return = array();
-      foreach ($this->document_fields() as $key => $label) {
-        if ($value = get_post_meta( $object[ 'id' ], $key, true )) {
-          $return[$key] = $value;
-        }
+    $FormMeta = new DocumentFormMeta;
+    $return = $FormMeta->get_options( $object[ 'id' ] );
+    foreach (['document', 'document_filename', 'document_meta'] as $key) {
+      if ($value = get_post_meta( $object[ 'id' ], $key, true )) {
+        $return[$key] = $value;
       }
-      return $return;
+    }
+    return $return;
   }
 
   /**
@@ -253,32 +249,6 @@ class ProudDocument extends \ProudPlugin {
   }
 
   /**
-   * Adds form api fields
-   */
-  public function build_fields($id) {
-    $this->fields = [];
-  
-    $this->fields['form'] = [
-      '#type' => 'gravityform',
-      '#title' => __('Form'),
-      '#description' => __('Select a form. <a href="admin.php?page=gf_edit_forms" target="_blank">Create a new form</a>. Leave this empty if there is no form version of this Document.', 'wp-proud-document'),
-      '#name' => 'form',
-      '#value' => get_post_meta( $id, 'form', true ),
-    ];
-
-    return $this->fields;
-  }
-
-  /**
-   * Adds document form metadata field
-   */
-  public function display_document_form_meta_box( $document ) {
-    $this->build_fields($document->ID);
-    $form = new \Proud\Core\FormHelper( $this->key, $this->fields );
-    $form->printFields();
-  }
-
-  /**
    * Saves document metadata fields 
    */
   public function add_document_fields( $id, $document ) {
@@ -287,13 +257,6 @@ class ProudDocument extends \ProudPlugin {
       update_post_meta( $id, 'document', $_POST['upload_src'] );
       update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
       update_post_meta( $id, 'document_meta', $_POST['upload_meta'] );
-
-      // Form api fields
-      foreach ($this->build_fields($id) as $key => $field) {
-        if ( !empty( $_POST[$key] ) || !empty(get_post_meta( $id, $key, true )) ) {  // @todo: check if it has been set already to allow clearing of value
-          update_post_meta( $id, $key, $_POST[$key] );
-        }
-      }
     }
   }
 
@@ -306,11 +269,52 @@ class ProudDocument extends \ProudPlugin {
     ));
   }
 
-
 } // class
-
-
 new ProudDocument;
+
+
+// Document form meta box
+class DocumentFormMeta extends \ProudMetaBox {
+
+  public $options = [  // Meta options, key => default                             
+    'form' => ''
+  ];
+
+  public function __construct() {
+    parent::__construct( 
+      'document_form', // key
+      'Form', // title
+      'document', // screen
+      'normal',  // position
+      'high' // priority
+    );
+  }
+
+
+  /**
+   * Called on form creation
+   * @param $displaying : false if just building form, true if about to display
+   * Use displaying:true to do any difficult loading that should only occur when
+   * the form actually will display
+   */
+  public function set_fields( $displaying ) {
+
+    // Already set, no loading necessary
+    if( $displaying ) {
+      return;
+    }
+    $this->fields = [];
+  
+    $this->fields['form'] = [
+      '#type' => 'gravityform',
+      '#title' => __('Form'),
+      '#description' => __('Select a form. <a href="admin.php?page=gf_edit_forms" target="_blank">Create a new form</a>. Leave this empty if there is no form version of this Document.', 'wp-proud-document'),
+      '#name' => 'form',
+    ];
+  }
+}
+if( is_admin() )
+  new DocumentFormMeta;
 
 
 /**
