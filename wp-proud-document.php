@@ -17,6 +17,11 @@ if ( ! class_exists( 'ProudPlugin' ) ) {
   require_once( plugin_dir_path(__FILE__) . '../wp-proud-core/proud-plugin.class.php' );
 }
 
+// Settings page
+if( is_admin() ) {
+  require_once( plugin_dir_path(__FILE__) . 'settings/document-reset.php' );
+}
+
 class ProudDocument extends \ProudPlugin {
 
   /*public function __construct() {
