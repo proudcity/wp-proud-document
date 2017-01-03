@@ -46,6 +46,16 @@ class ProudDocument extends \ProudPlugin {
 
     add_action( 'wp_ajax_proud_document_icon', array($this, 'get_icon') );
 
+    add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 21, 2 );
+
+  }
+              
+
+  public function wp_get_attachment_url( $url = '', $post_id = '' ) {
+    if ( !empty(PROUD_WP_STATELESS_FORCE) && PROUD_WP_STATELESS_FORCE && !empty(WP_STATELESS_MEDIA_ROOT_DIR) && strpos($url, 'wp-content/uploads') ) {
+      $url = str_replace(get_site_url() . '/wp-content/uploads/', 'https://storage.googleapis.com/proudcity/'. WP_STATELESS_MEDIA_ROOT_DIR , $url);
+    } 
+    return $url;
   }
 
 
@@ -187,6 +197,7 @@ class ProudDocument extends \ProudPlugin {
           json = file_frame.state().get( 'selection' ).first().toJSON();
           jQuery('#upload-src').val(json.url);
           jQuery('#upload-filename').val(json.filename);
+          //console.log(json);
           jQuery('#upload-meta').val(JSON.stringify({
             size: json.filesizeHumanReadable,
             icon: json.icon,
@@ -218,7 +229,8 @@ class ProudDocument extends \ProudPlugin {
                         $('#upload-thumb').addClass( response.icon );
                       }
                     );
-                    $('#upload-filename-text').html($('#upload-filename').val() + ' ('+ meta.size +') <a href="#">edit</a>');
+                    meta.size = meta.size ? ' ('+ meta.size +')' : '';
+                    $('#upload-filename-text').html($('#upload-filename').val() + meta.size + ' <a href="#">edit</a>');
                     $('#upload-thumb, #upload-filename-text, #upload-remove, #upload-change-text').show();
                     $('#upload-add-text, #upload-filename').hide();
                   }
