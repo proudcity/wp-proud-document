@@ -115,7 +115,7 @@ class ProudDocument extends \ProudPlugin {
   }
 
   public function document_rest_support() {
-    register_api_field( 'document',
+    register_rest_field( 'document',
           'meta',
           array(
               'get_callback'    => array( $this, 'document_rest_metadata' ),
