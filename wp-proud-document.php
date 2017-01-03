@@ -52,8 +52,12 @@ class ProudDocument extends \ProudPlugin {
               
 
   public function wp_get_attachment_url( $url = '', $post_id = '' ) {
-    if ( !empty(PROUD_WP_STATELESS_FORCE) && PROUD_WP_STATELESS_FORCE && !empty(WP_STATELESS_MEDIA_ROOT_DIR) && strpos($url, 'wp-content/uploads') ) {
-      $url = str_replace(get_site_url() . '/wp-content/uploads/', 'https://storage.googleapis.com/proudcity/'. WP_STATELESS_MEDIA_ROOT_DIR , $url);
+    $const_defined = defined( 'PROUD_WP_STATELESS_FORCE' )
+                  && PROUD_WP_STATELESS_FORCE
+                  && defined( 'WP_STATELESS_MEDIA_ROOT_DIR' ) 
+                  && WP_STATELESS_MEDIA_ROOT_DIR;
+    if ( $const_defined && strpos($url, 'wp-content/uploads') ) {
+      $url = str_replace( get_site_url() . '/wp-content/uploads/', 'https://storage.googleapis.com/proudcity/'. WP_STATELESS_MEDIA_ROOT_DIR , $url );
     } 
     return $url;
   }
