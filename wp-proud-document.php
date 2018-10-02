@@ -286,7 +286,7 @@ class ProudDocument extends \ProudPlugin {
    */
   public function get_icon( ) {
     return wp_send_json(array(
-      'icon' => get_document_icon( 0, $_GET['filetype'] )
+      'icon' => get_document_icon( 0, sanitize_text_field( $_GET['filetype'] ) )
     ));
   }
 
