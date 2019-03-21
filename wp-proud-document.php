@@ -203,6 +203,7 @@ class ProudDocument extends \ProudPlugin {
           jQuery('#upload-filename').val(json.filename);
           //console.log(json);
           jQuery('#upload-meta').val(JSON.stringify({
+            fid: json.id,
             size: json.filesizeHumanReadable,
             icon: json.icon,
             mime: json.mime,
@@ -274,6 +275,8 @@ class ProudDocument extends \ProudPlugin {
    */
   public function add_document_fields( $id, $document ) {
     if ( $document->post_type == 'document' ) {
+//      var_dump($_POST);
+//      exit;
       // File fields
       update_post_meta( $id, 'document', $_POST['upload_src'] );
       update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
