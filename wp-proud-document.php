@@ -174,6 +174,7 @@ class ProudDocument extends \ProudPlugin {
    */
   public function display_document_file_meta_box( $document ) {
     wp_enqueue_media();
+
     ?>
       <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
       <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo get_post_meta( $document->ID, 'document_meta', true ); ?>' />
@@ -203,7 +204,9 @@ class ProudDocument extends \ProudPlugin {
           jQuery('#upload-filename').val(json.filename);
           //console.log(json);
           jQuery('#upload-meta').val(JSON.stringify({
+            fid: json.id,
             size: json.filesizeHumanReadable,
+            size_bytes: json.filesizeInBytes,
             icon: json.icon,
             mime: json.mime,
             filetype: json.mime.split('/')[1]
@@ -273,12 +276,35 @@ class ProudDocument extends \ProudPlugin {
    * Saves document metadata fields 
    */
   public function add_document_fields( $id, $document ) {
-    if ( $document->post_type == 'document' ) {
-      // File fields
-      update_post_meta( $id, 'document', $_POST['upload_src'] );
-      update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
-      update_post_meta( $id, 'document_meta', $_POST['upload_meta'] );
-    }
+      if ( $document->post_type == 'document' ) {
+          if ( empty( $_POST['upload_src'] ) ) {
+            return;
+          }
+
+          $meta = [];
+          try {
+              $meta = json_decode( stripslashes( $_POST['upload_meta'] ), true );
+          } catch ( \Exception $e ) {
+              error_log($e);
+          }
+
+          // Use stateless version, as uploaded files are losing their
+          // size in wordpress as they are unloaded to wp-stateless
+          // @TODO add processing for non-stateless
+          if ( !empty( $meta['fid'] ) ) {
+              $stateless_meta = \Proud\Core\getStatelessFileMeta( $meta['fid'] );
+
+              try {
+                  $_POST['upload_meta'] = json_encode( $stateless_meta );
+              } catch ( \Exception $e ) {
+                  error_log($e);
+              }
+          }
+
+          update_post_meta( $id, 'document', $_POST['upload_src'] );
+          update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
+          update_post_meta( $id, 'document_meta',   $_POST['upload_meta']);
+      }
   }
 
   /**
@@ -362,38 +388,5 @@ function get_document_icon($post = 0, $filename = null) {
     return 'fa-globe';
   }
 
-  switch ( get_document_type($post, $filename) ) {
-    case 'pdf':
-      return 'fa-file-pdf-o';
-      break;
-    case 'doc':
-    case 'docx':
-      return 'fa-file-word-o';
-      break;
-    case 'ppt':
-    case 'pptx':
-      return 'fa-file-powerpoint-o';
-      break;
-    case 'xls':
-    case 'xlsx':
-      return 'fa-file-excel-o';
-      break;
-    case 'wav':
-    case 'aif':
-    case 'mp3':
-      return 'fa-file-audio-o';
-      break;
-    case 'zip':
-    case 'tar':
-      return 'fa-file-zip-o';
-      break;
-    case 'png':
-    case 'jpg':
-    case 'jpeg':
-    case 'gif':
-      return 'fa-file-photo-o';
-      break;
-    default:
-      return 'fa-file-text-o';
-  }
+  return \Proud\Core\document_icon_map( get_document_type( $post, $filename ) );
 }
