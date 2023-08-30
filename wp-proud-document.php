@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 1.0
+Version: 2023.08.30.0725
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -63,45 +63,46 @@ class ProudDocument extends \ProudPlugin {
   }
 
 
-  public function create_document() {
-      $labels = array(
-          'name'               => _x( 'Documents', 'post name', 'wp-document' ),
-          'singular_name'      => _x( 'Document', 'post type singular name', 'wp-document' ),
-          'menu_name'          => _x( 'Documents', 'admin menu', 'wp-document' ),
-          'name_admin_bar'     => _x( 'Document', 'add new on admin bar', 'wp-document' ),
-          'add_new'            => _x( 'Add New', 'document', 'wp-document' ),
-          'add_new_item'       => __( 'Add New Document', 'wp-document' ),
-          'new_item'           => __( 'New Document', 'wp-document' ),
-          'edit_item'          => __( 'Edit Document', 'wp-document' ),
-          'view_item'          => __( 'View Document', 'wp-document' ),
-          'all_items'          => __( 'All Documents', 'wp-document' ),
-          'search_items'       => __( 'Search document', 'wp-document' ),
-          'parent_item_colon'  => __( 'Parent document:', 'wp-document' ),
-          'not_found'          => __( 'No documents found.', 'wp-document' ),
-          'not_found_in_trash' => __( 'No documents found in Trash.', 'wp-document' )
-      );
+	public function create_document() {
+		$labels = array(
+			'name'               => _x( 'Documents', 'post name', 'wp-document' ),
+			'singular_name'      => _x( 'Document', 'post type singular name', 'wp-document' ),
+			'menu_name'          => _x( 'Documents', 'admin menu', 'wp-document' ),
+			'name_admin_bar'     => _x( 'Document', 'add new on admin bar', 'wp-document' ),
+			'add_new'            => _x( 'Add New', 'document', 'wp-document' ),
+			'add_new_item'       => __( 'Add New Document', 'wp-document' ),
+			'new_item'           => __( 'New Document', 'wp-document' ),
+			'edit_item'          => __( 'Edit Document', 'wp-document' ),
+			'view_item'          => __( 'View Document', 'wp-document' ),
+			'all_items'          => __( 'All Documents', 'wp-document' ),
+			'search_items'       => __( 'Search document', 'wp-document' ),
+			'parent_item_colon'  => __( 'Parent document:', 'wp-document' ),
+			'not_found'          => __( 'No documents found.', 'wp-document' ),
+			'not_found_in_trash' => __( 'No documents found in Trash.', 'wp-document' )
+		);
 
-      $args = array(
-          'labels'             => $labels,
-          'description'        => __( 'Description.', 'wp-document' ),
-          'public'             => true,
-          'publicly_queryable' => true,
-          'show_ui'            => true,
-          'show_in_menu'       => true,
-          'query_var'          => true,
-          'rewrite'            => array( 'slug' => 'documents' ),
-          'capability_type'    => 'post',
-          'has_archive'        => false,
-          'hierarchical'       => false,
-          'menu_position'      => null,
-          'show_in_rest'       => true,
-          'rest_base'          => 'documents',
-          'rest_controller_class' => 'WP_REST_Posts_Controller',
-          'supports'           => array( 'title', 'editor', 'excerpt',)
-      );
+		$args = array(
+			'labels'             => $labels,
+			'description'        => __( 'Description.', 'wp-document' ),
+			'public'             => true,
+			'publicly_queryable' => true,
+			'show_ui'            => true,
+			'show_in_menu'       => true,
+			'menu_icon' 		=> 'dashicons-media-document',
+			'query_var'          => true,
+			'rewrite'            => array( 'slug' => 'documents' ),
+			'capability_type'    => 'post',
+			'has_archive'        => false,
+			'hierarchical'       => false,
+			'menu_position'      => null,
+			'show_in_rest'       => true,
+			'rest_base'          => 'documents',
+			'rest_controller_class' => 'WP_REST_Posts_Controller',
+			'supports'           => array( 'title', 'editor', 'excerpt',)
+		);
 
-      register_post_type( 'document', $args );
-  }
+	register_post_type( 'document', $args );
+}
 
   function document_taxonomy() {
     register_taxonomy(
