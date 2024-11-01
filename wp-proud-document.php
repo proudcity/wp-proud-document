@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 2023.08.30.0725
+Version: 2024.11.01.0952
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -19,7 +19,7 @@ if ( ! class_exists( 'ProudPlugin' ) ) {
 
 // Settings page
 if( is_admin() ) {
-  require_once( plugin_dir_path(__FILE__) . 'settings/document-reset.php' );
+  //require_once( plugin_dir_path(__FILE__) . 'settings/document-reset.php' );
 }
 
 class ProudDocument extends \ProudPlugin {
@@ -49,16 +49,16 @@ class ProudDocument extends \ProudPlugin {
     add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 21, 2 );
 
   }
-              
+
 
   public function wp_get_attachment_url( $url = '', $post_id = '' ) {
     $const_defined = defined( 'PROUD_WP_STATELESS_FORCE' )
                   && PROUD_WP_STATELESS_FORCE
-                  && defined( 'WP_STATELESS_MEDIA_ROOT_DIR' ) 
+                  && defined( 'WP_STATELESS_MEDIA_ROOT_DIR' )
                   && WP_STATELESS_MEDIA_ROOT_DIR;
     if ( $const_defined && strpos($url, 'wp-content/uploads') ) {
       $url = str_replace( get_site_url() . '/wp-content/uploads/', 'https://storage.googleapis.com/proudcity/'. WP_STATELESS_MEDIA_ROOT_DIR , $url );
-    } 
+    }
     return $url;
   }
 
@@ -143,7 +143,7 @@ class ProudDocument extends \ProudPlugin {
   // @todo make this work
   // See http://code.tutsplus.com/articles/adding-and-removing-images-with-the-wordpress-media-uploader--cms-22087
   /*public function document_enqueue_scripts() {
-    
+
     wp_enqueue_script(
       $this->name,
       plugin_dir_url( __FILE__ ) . 'assets/admin.js',
@@ -215,7 +215,7 @@ class ProudDocument extends \ProudPlugin {
         });
         file_frame.open();
       }
-       
+
       (function( $ ) {
           'use strict';
           $(function() {
@@ -231,8 +231,8 @@ class ProudDocument extends \ProudPlugin {
                   if (meta != undefined && meta.mime != undefined) {
                     // Get the icon to use
                     jQuery.get(
-                      ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype, 
-                      {}, 
+                      ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype,
+                      {},
                       function(response){
                         $('#upload-thumb').addClass( response.icon );
                       }
@@ -265,16 +265,16 @@ class ProudDocument extends \ProudPlugin {
                 });
               }
               bindBtns();
-              
+
           });
       })( jQuery );
     </script>
     <style type="text/css">#wpseo_meta,#advanced-sortables{display:none;}</style><!--@todo: do this with a php hook -->
-    <?php 
+    <?php
   }
 
   /**
-   * Saves document metadata fields 
+   * Saves document metadata fields
    */
   public function add_document_fields( $id, $document ) {
       if ( $document->post_type == 'document' ) {
@@ -324,12 +324,12 @@ new ProudDocument;
 // Document form meta box
 class DocumentFormMeta extends \ProudMetaBox {
 
-  public $options = [  // Meta options, key => default                             
+  public $options = [  // Meta options, key => default
     'form' => ''
   ];
 
   public function __construct() {
-    parent::__construct( 
+    parent::__construct(
       'document_form', // key
       'Form', // title
       'document', // screen
@@ -352,7 +352,7 @@ class DocumentFormMeta extends \ProudMetaBox {
       return;
     }
     $this->fields = [];
-  
+
     $this->fields['form'] = [
       '#type' => 'gravityform',
       '#title' => __('Form'),
