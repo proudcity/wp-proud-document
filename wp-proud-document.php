@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 2024.11.01.0952
+Version: 2025.12.03.1118
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -63,45 +63,45 @@ class ProudDocument extends \ProudPlugin {
   }
 
 
-	public function create_document() {
-		$labels = array(
-			'name'               => _x( 'Documents', 'post name', 'wp-document' ),
-			'singular_name'      => _x( 'Document', 'post type singular name', 'wp-document' ),
-			'menu_name'          => _x( 'Documents', 'admin menu', 'wp-document' ),
-			'name_admin_bar'     => _x( 'Document', 'add new on admin bar', 'wp-document' ),
-			'add_new'            => _x( 'Add New', 'document', 'wp-document' ),
-			'add_new_item'       => __( 'Add New Document', 'wp-document' ),
-			'new_item'           => __( 'New Document', 'wp-document' ),
-			'edit_item'          => __( 'Edit Document', 'wp-document' ),
-			'view_item'          => __( 'View Document', 'wp-document' ),
-			'all_items'          => __( 'All Documents', 'wp-document' ),
-			'search_items'       => __( 'Search document', 'wp-document' ),
-			'parent_item_colon'  => __( 'Parent document:', 'wp-document' ),
-			'not_found'          => __( 'No documents found.', 'wp-document' ),
-			'not_found_in_trash' => __( 'No documents found in Trash.', 'wp-document' )
-		);
+    public function create_document() {
+        $labels = array(
+            'name'               => _x( 'Documents', 'post name', 'wp-document' ),
+            'singular_name'      => _x( 'Document', 'post type singular name', 'wp-document' ),
+            'menu_name'          => _x( 'Documents', 'admin menu', 'wp-document' ),
+            'name_admin_bar'     => _x( 'Document', 'add new on admin bar', 'wp-document' ),
+            'add_new'            => _x( 'Add New', 'document', 'wp-document' ),
+            'add_new_item'       => __( 'Add New Document', 'wp-document' ),
+            'new_item'           => __( 'New Document', 'wp-document' ),
+            'edit_item'          => __( 'Edit Document', 'wp-document' ),
+            'view_item'          => __( 'View Document', 'wp-document' ),
+            'all_items'          => __( 'All Documents', 'wp-document' ),
+            'search_items'       => __( 'Search document', 'wp-document' ),
+            'parent_item_colon'  => __( 'Parent document:', 'wp-document' ),
+            'not_found'          => __( 'No documents found.', 'wp-document' ),
+            'not_found_in_trash' => __( 'No documents found in Trash.', 'wp-document' )
+        );
 
-		$args = array(
-			'labels'             => $labels,
-			'description'        => __( 'Description.', 'wp-document' ),
-			'public'             => true,
-			'publicly_queryable' => true,
-			'show_ui'            => true,
-			'show_in_menu'       => true,
-			'menu_icon' 		=> 'dashicons-media-document',
-			'query_var'          => true,
-			'rewrite'            => array( 'slug' => 'documents' ),
-			'capability_type'    => 'post',
-			'has_archive'        => false,
-			'hierarchical'       => false,
-			'menu_position'      => null,
-			'show_in_rest'       => true,
-			'rest_base'          => 'documents',
-			'rest_controller_class' => 'WP_REST_Posts_Controller',
-			'supports'           => array( 'title', 'editor', 'excerpt',)
-		);
+        $args = array(
+            'labels'             => $labels,
+            'description'        => __( 'Description.', 'wp-document' ),
+            'public'             => true,
+            'publicly_queryable' => true,
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'menu_icon'         => 'dashicons-media-document',
+            'query_var'          => true,
+            'rewrite'            => array( 'slug' => 'documents' ),
+            'capability_type'    => 'post',
+            'has_archive'        => false,
+            'hierarchical'       => false,
+            'menu_position'      => null,
+            'show_in_rest'       => true,
+            'rest_base'          => 'documents',
+            'rest_controller_class' => 'WP_REST_Posts_Controller',
+            'supports'           => array( 'title', 'editor', 'excerpt',)
+        );
 
-	register_post_type( 'document', $args );
+    register_post_type( 'document', $args );
 }
 
   function document_taxonomy() {
@@ -322,48 +322,52 @@ new ProudDocument;
 
 
 // Document form meta box
-class DocumentFormMeta extends \ProudMetaBox {
+if (class_exists('ProudMetaBox')) {
+    class DocumentFormMeta extends \ProudMetaBox {
 
-  public $options = [  // Meta options, key => default
-    'form' => ''
-  ];
+        public $options = [  // Meta options, key => default
+            'form' => ''
+        ];
 
-  public function __construct() {
-    parent::__construct(
-      'document_form', // key
-      'Form', // title
-      'document', // screen
-      'normal',  // position
-      'high' // priority
-    );
-  }
+        public function __construct() {
+            parent::__construct(
+                'document_form', // key
+                'Form', // title
+                'document', // screen
+                'normal',  // position
+                'high' // priority
+            );
+        }
 
 
-  /**
-   * Called on form creation
-   * @param $displaying : false if just building form, true if about to display
-   * Use displaying:true to do any difficult loading that should only occur when
-   * the form actually will display
-   */
-  public function set_fields( $displaying ) {
+        /**
+         * Called on form creation
+         * @param $displaying : false if just building form, true if about to display
+         *
+         * Use displaying:true to do any difficult loading that should only occur when
+         * the form actually will display
+         */
+        public function set_fields( $displaying ) {
 
-    // Already set, no loading necessary
-    if( $displaying ) {
-      return;
+            // Already set, no loading necessary
+            if( $displaying ) {
+            return;
+            }
+            $this->fields = [];
+
+            $this->fields['form'] = [
+                '#type' => 'gravityform',
+                '#title' => __('Form'),
+                '#description' => __('Select a form. <a href="admin.php?page=gf_edit_forms" target="_blank">Create a new form</a>. Leave this empty if there is no form version of this Document.', 'wp-proud-document'),
+                '#name' => 'form',
+            ];
+        }
     }
-    $this->fields = [];
 
-    $this->fields['form'] = [
-      '#type' => 'gravityform',
-      '#title' => __('Form'),
-      '#description' => __('Select a form. <a href="admin.php?page=gf_edit_forms" target="_blank">Create a new form</a>. Leave this empty if there is no form version of this Document.', 'wp-proud-document'),
-      '#name' => 'form',
-    ];
-  }
+    if (is_admin()) {
+        new DocumentFormMeta;
+    }
 }
-if( is_admin() )
-  new DocumentFormMeta;
-
 
 /**
  * Helper: Returns the document type (suffix)
