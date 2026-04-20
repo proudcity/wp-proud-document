@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 2025.12.03.1118
+Version: 2026.04.20.1603
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -175,13 +175,14 @@ class ProudDocument extends \ProudPlugin {
    */
   public function display_document_file_meta_box( $document ) {
     wp_enqueue_media();
+    wp_nonce_field( 'proud_document_file_meta', '_proud_document_nonce' );
 
     ?>
-      <input id="upload-src" type="hidden" name="upload_src" value="<?php echo get_post_meta( $document->ID, 'document', true ); ?>" />
-      <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo get_post_meta( $document->ID, 'document_meta', true ); ?>' />
+      <input id="upload-src" type="hidden" name="upload_src" value="<?php echo esc_attr( get_post_meta( $document->ID, 'document', true ) ); ?>" />
+      <input id="upload-meta" type="hidden" name="upload_meta" value='<?php echo esc_attr( get_post_meta( $document->ID, 'document_meta', true ) ); ?>' />
       <i class="fa fa-3x filetype-icon text-muted" id="upload-thumb" style="float:left;margin-right: 5px;"></i>
       <strong><div id="upload-filename-text" style="padding-bottom:.5em;"></div></strong>
-      <input id="upload-filename" type="text" name="upload_filename" value="<?php echo get_post_meta( $document->ID, 'document_filename', true ); ?>" style="display:none;" />
+      <input id="upload-filename" type="text" name="upload_filename" value="<?php echo esc_attr( get_post_meta( $document->ID, 'document_filename', true ) ); ?>" style="display:none;" />
       <div>
         <button type="button" id="upload-remove" class="button" style="display:none;">Remove</button>
         <button type="button" id="upload-upload" class="button"><span class="wp-media-buttons-icon"></span> <span id="upload-add-text">Add</span><span id="upload-change-text" style="display: none">Change</span> Document</button>
@@ -231,7 +232,7 @@ class ProudDocument extends \ProudPlugin {
                   if (meta != undefined && meta.mime != undefined) {
                     // Get the icon to use
                     jQuery.get(
-                      ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype,
+                      ajaxurl + '?action=proud_document_icon&filetype=' + meta.filetype + '&_wpnonce=<?php echo wp_create_nonce( 'proud_document_icon' ); ?>',
                       {},
                       function(response){
                         $('#upload-thumb').addClass( response.icon );
@@ -277,6 +278,12 @@ class ProudDocument extends \ProudPlugin {
    * Saves document metadata fields
    */
   public function add_document_fields( $id, $document ) {
+      if ( ! isset( $_POST['_proud_document_nonce'] ) || ! wp_verify_nonce( $_POST['_proud_document_nonce'], 'proud_document_file_meta' ) ) {
+          return;
+      }
+      if ( ! current_user_can( 'edit_post', $id ) ) {
+          return;
+      }
       if ( $document->post_type == 'document' ) {
           if ( empty( $_POST['upload_src'] ) ) {
             return;
@@ -302,9 +309,9 @@ class ProudDocument extends \ProudPlugin {
               }
           }
 
-          update_post_meta( $id, 'document', $_POST['upload_src'] );
-          update_post_meta( $id, 'document_filename', $_POST['upload_filename'] );
-          update_post_meta( $id, 'document_meta',   $_POST['upload_meta']);
+          update_post_meta( $id, 'document', esc_url_raw( $_POST['upload_src'] ) );
+          update_post_meta( $id, 'document_filename', sanitize_file_name( $_POST['upload_filename'] ) );
+          update_post_meta( $id, 'document_meta', sanitize_text_field( $_POST['upload_meta'] ) );
       }
   }
 
@@ -312,6 +319,10 @@ class ProudDocument extends \ProudPlugin {
    * AJAX callback gets icon from a filetype
    */
   public function get_icon( ) {
+    check_ajax_referer( 'proud_document_icon', '_wpnonce' );
+    if ( ! current_user_can( 'edit_posts' ) ) {
+      wp_send_json_error( 'Unauthorized', 403 );
+    }
     return wp_send_json(array(
       'icon' => get_document_icon( 0, sanitize_text_field( $_GET['filetype'] ) )
     ));
