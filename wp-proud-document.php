@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 2026.04.20.1603
+Version: 2026.04.28.0912
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -302,10 +302,12 @@ class ProudDocument extends \ProudPlugin {
           if ( !empty( $meta['fid'] ) ) {
               $stateless_meta = \Proud\Core\getStatelessFileMeta( $meta['fid'] );
 
-              try {
-                  $_POST['upload_meta'] = json_encode( $stateless_meta );
-              } catch ( \Exception $e ) {
-                  error_log($e);
+              if ( $stateless_meta !== null ) {
+                  try {
+                      $_POST['upload_meta'] = json_encode( $stateless_meta );
+                  } catch ( \Exception $e ) {
+                      error_log($e);
+                  }
               }
           }
 
