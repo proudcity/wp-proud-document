@@ -3,7 +3,7 @@
 Plugin Name: Proud Document
 Plugin URI: http://proudcity.com/
 Description: Declares an Document custom post type.
-Version: 2026.04.28.0912
+Version: 2026.10.26.1425
 Author: ProudCity
 Author URI: http://proudcity.com/
 License: Affero GPL v3
@@ -394,7 +394,7 @@ function get_document_type($post = 0, $filename = null) {
     return '';
   }
   $info = pathinfo($filename);
-  return strtolower($info['extension']);
+  return strtolower($info['extension'] ?? '');
 }
 
 /**

@@ -1,3 +1,9 @@
+## 2026.10.26.1425
+
+- Fixed a PHP 8 warning in `get_document_type()` for filenames with no extension; it now returns an empty string, as before, without warning (wp-proudcity#3006).
+
+References: https://github.com/proudcity/wp-proudcity/issues/3006
+
 ## 2026-04-20
 
 - Fixed stored XSS in document admin metabox — added `esc_attr()` to three `get_post_meta()` outputs in `display_document_file_meta_box()`
